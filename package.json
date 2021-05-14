@@ -1,7 +1,7 @@
 {
-  "name": "obsidian-sample-plugin",
-  "version": "0.12.0",
-  "description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+  "name": "obsidian-collapse-all-plugin",
+  "version": "0.1.0",
+  "description": "This plugin adds a button to collapse all folders in the file explorer.",
   "main": "main.js",
   "scripts": {
     "dev": "rollup --config rollup.config.js -w",
