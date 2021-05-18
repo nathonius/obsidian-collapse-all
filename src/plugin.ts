@@ -5,7 +5,7 @@ import { CollapseAllSettings, CollapseAllSettingsTab } from './settings';
 export class CollapseAllPlugin extends Plugin {
   settings: CollapseAllSettings;
 
-  async onload() {
+  async onload(): Promise<void> {
     await this.loadSettings();
 
     // TODO: Find a better event to listen for.
@@ -17,19 +17,20 @@ export class CollapseAllPlugin extends Plugin {
       });
     });
 
+    this.addCommand({
+      id: 'collapse-all-collapse',
+      name: 'Collapse all open folders',
+      icon: 'double-up-arrow-glyph',
+      callback: () => {
+        this.collapseAllCommand();
+      }
+    });
     this.addSettingTab(new CollapseAllSettingsTab(this.app, this));
-
-    // TODO: Add collapse command to palette.
   }
 
-  onunload() {
-    // Cleanup
-  }
-
-  private getFileExplorers(): WorkspaceLeaf[] {
-    return this.app.workspace.getLeavesOfType('file-explorer');
-  }
-
+  /**
+   * Adds the collapse button to a file explorer leaf.
+   */
   private addCollapseButton(explorer: WorkspaceLeaf): void {
     // TODO: containerEl is not a public property of the leaf. Is there a better way?
     const container = (explorer as any).containerEl as HTMLDivElement;
@@ -39,15 +40,14 @@ export class CollapseAllPlugin extends Plugin {
     if (navContainer.querySelector('.collapse-button')) {
       return;
     }
+
     const newIcon = document.createElement('div');
     // TODO: Better way to get this icon?
     newIcon.innerHTML = COLLAPSE_ALL_ICON;
     newIcon.className = 'nav-action-button collapse-button';
     newIcon.setAttribute('aria-label', 'Collapse All');
     this.registerDomEvent(newIcon, 'click', () => {
-      const exp = document.querySelector(
-        'div.workspace-leaf-content[data-type="file-explorer"]'
-      ) as HTMLDivElement | null;
+      const exp = this.getFileExplorerElement();
       if (exp) {
         this.collapseAll(exp);
       }
@@ -55,6 +55,27 @@ export class CollapseAllPlugin extends Plugin {
     navContainer.appendChild(newIcon);
   }
 
+  /**
+   * Switches to the file explorer leaf, then collapses as normal.
+   */
+  private async collapseAllCommand(): Promise<void> {
+    const leaves = this.getFileExplorers();
+    if (leaves && leaves.length > 0) {
+      // Switch to file explorer
+      this.app.workspace.revealLeaf(leaves[0]);
+      // Wait for file explorer to be revealed
+      await new Promise((r) => setTimeout(r, 50));
+
+      const explorer = this.getFileExplorerElement();
+      if (explorer) {
+        this.collapseAll(explorer);
+      }
+    }
+  }
+
+  /**
+   * Recursive root function with starting depth
+   */
   private collapseAll(element: HTMLDivElement): void {
     this.collapseAllUnder(
       element,
@@ -64,6 +85,10 @@ export class CollapseAllPlugin extends Plugin {
     );
   }
 
+  /**
+   * Recursively, depth-first closes folders up to a given max depth.
+   * Must wait some time between each close action for the UI to settle out.
+   */
   private async collapseAllUnder(
     currentFolder: HTMLDivElement,
     depth: number,
@@ -86,7 +111,7 @@ export class CollapseAllPlugin extends Plugin {
         if (title && children) {
           title.click();
           // TODO: Fix incompatibility with folder note plugin.
-          // As is, it will create new notes for some reason.
+          // As is, it will create new notes for some reason if this wait time is too low.
           await new Promise((r) => setTimeout(r, waitMs));
         }
         break;
@@ -94,6 +119,25 @@ export class CollapseAllPlugin extends Plugin {
     }
   }
 
+  /**
+   * Returns all loaded file explorer leaves
+   */
+  private getFileExplorers(): WorkspaceLeaf[] {
+    return this.app.workspace.getLeavesOfType('file-explorer');
+  }
+
+  /**
+   * Get the content element for the open file explorer
+   */
+  private getFileExplorerElement(): HTMLDivElement | null {
+    return document.querySelector(
+      'div.workspace-leaf-content[data-type="file-explorer"]'
+    ) as HTMLDivElement | null;
+  }
+
+  /**
+   * Finds an open folder element that is a child of the given root element.
+   */
   private getNextOpenFolder(
     rootElement: HTMLElement | Document
   ): HTMLDivElement | null {
@@ -102,13 +146,11 @@ export class CollapseAllPlugin extends Plugin {
     ) as HTMLDivElement;
   }
 
-  async loadSettings() {
+  async loadSettings(): Promise<void> {
     this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
   }
 
-  async saveSettings() {
+  async saveSettings(): Promise<void> {
     await this.saveData(this.settings);
   }
 }
-
-export default CollapseAllPlugin;

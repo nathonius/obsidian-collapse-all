@@ -1,5 +1,5 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
-import { CollapseAllPlugin } from './main';
+import { CollapseAllPlugin } from './plugin';
 
 export interface CollapseAllSettings {
   maxDepth: number;
