@@ -1,20 +1,19 @@
-import { Plugin, WorkspaceLeaf } from 'obsidian';
-import { COLLAPSE_ALL_ICON, DEFAULT_SETTINGS } from './constants';
-import { CollapseAllSettings, CollapseAllSettingsTab } from './settings';
+import { EventRef, Plugin, WorkspaceLeaf } from 'obsidian';
+import { COLLAPSE_ALL_ICON } from './constants';
+import { FileExplorerItem } from './interfaces';
 
 export class CollapseAllPlugin extends Plugin {
-  settings: CollapseAllSettings;
+  private ref: EventRef | null = null;
 
   async onload(): Promise<void> {
-    await this.loadSettings();
-
-    // TODO: Find a better event to listen for.
-    // We only add the button once, but this is probably unnecessary.
-    this.app.workspace.on('active-leaf-change', () => {
+    this.ref = this.app.workspace.on('active-leaf-change', () => {
       const explorers = this.getFileExplorers();
       explorers.forEach((exp) => {
         this.addCollapseButton(exp);
       });
+
+      // Remove listener.
+      this.app.workspace.offref(this.ref);
     });
 
     this.addCommand({
@@ -22,10 +21,9 @@ export class CollapseAllPlugin extends Plugin {
       name: 'Collapse all open folders',
       icon: 'double-up-arrow-glyph',
       callback: () => {
-        this.collapseAllCommand();
+        this.collapseAll();
       }
     });
-    this.addSettingTab(new CollapseAllSettingsTab(this.app, this));
   }
 
   /**
@@ -47,75 +45,25 @@ export class CollapseAllPlugin extends Plugin {
     newIcon.className = 'nav-action-button collapse-button';
     newIcon.setAttribute('aria-label', 'Collapse All');
     this.registerDomEvent(newIcon, 'click', () => {
-      const exp = this.getFileExplorerElement();
-      if (exp) {
-        this.collapseAll(exp);
-      }
+      this.collapseAll();
     });
     navContainer.appendChild(newIcon);
   }
 
   /**
-   * Switches to the file explorer leaf, then collapses as normal.
+   * Get all file explorers, collapse all open folders.
    */
-  private async collapseAllCommand(): Promise<void> {
-    const leaves = this.getFileExplorers();
-    if (leaves && leaves.length > 0) {
-      // Switch to file explorer
-      this.app.workspace.revealLeaf(leaves[0]);
-      // Wait for file explorer to be revealed
-      await new Promise((r) => setTimeout(r, 50));
-
-      const explorer = this.getFileExplorerElement();
-      if (explorer) {
-        this.collapseAll(explorer);
-      }
-    }
-  }
-
-  /**
-   * Recursive root function with starting depth
-   */
-  private collapseAll(element: HTMLDivElement): void {
-    this.collapseAllUnder(
-      element,
-      0,
-      this.settings.maxDepth,
-      (11 - this.settings.speed) * 50
-    );
-  }
-
-  /**
-   * Recursively, depth-first closes folders up to a given max depth.
-   * Must wait some time between each close action for the UI to settle out.
-   */
-  private async collapseAllUnder(
-    currentFolder: HTMLDivElement,
-    depth: number,
-    maxDepth: number,
-    waitMs: number
-  ): Promise<void> {
-    while (true) {
-      // Depth first search
-      const nextFolder = this.getNextOpenFolder(currentFolder);
-      // Root element has children to close
-      if (nextFolder !== null && (maxDepth === -1 || depth < maxDepth)) {
-        await this.collapseAllUnder(nextFolder, depth + 1, maxDepth, waitMs);
-      }
-      // Root element has no children to close. Close root element.
-      else {
-        const title = currentFolder.querySelector(
-          'div.nav-folder-title'
-        ) as HTMLDivElement | null;
-        const children = currentFolder.querySelector('div.nav-folder-children');
-        if (title && children) {
-          title.click();
-          // TODO: Fix incompatibility with folder note plugin.
-          // As is, it will create new notes for some reason if this wait time is too low.
-          await new Promise((r) => setTimeout(r, waitMs));
-        }
-        break;
-      }
+  private collapseAll(): void {
+    const explorers = this.getFileExplorers();
+    if (explorers) {
+      explorers.forEach((exp) => {
+        const items = this.getExplorerItems(exp);
+        items.forEach((item) => {
+          if (this.explorerItemIsFolder(item) && item.collapsed !== true) {
+            item.setCollapsed(true);
+          }
+        });
+      });
     }
   }
 
@@ -127,30 +75,22 @@ export class CollapseAllPlugin extends Plugin {
   }
 
   /**
-   * Get the content element for the open file explorer
+   * Get all `fileItems` on explorer view. This property is not documented.
    */
-  private getFileExplorerElement(): HTMLDivElement | null {
-    return document.querySelector(
-      'div.workspace-leaf-content[data-type="file-explorer"]'
-    ) as HTMLDivElement | null;
+  private getExplorerItems(explorer: WorkspaceLeaf): FileExplorerItem[] {
+    return Object.values(
+      (explorer.view as any).fileItems
+    ) as FileExplorerItem[];
   }
 
   /**
-   * Finds an open folder element that is a child of the given root element.
+   * Ensures given explorer item is a folder and not the root or a note
    */
-  private getNextOpenFolder(
-    rootElement: HTMLElement | Document
-  ): HTMLDivElement | null {
-    return rootElement.querySelector(
-      'div.nav-folder:not(.is-collapsed):not(.mod-root)'
-    ) as HTMLDivElement;
-  }
-
-  async loadSettings(): Promise<void> {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-  }
-
-  async saveSettings(): Promise<void> {
-    await this.saveData(this.settings);
+  private explorerItemIsFolder(item: FileExplorerItem): boolean {
+    return (
+      'children' in item.file &&
+      item.file.path !== '/' &&
+      item.collapsed !== undefined
+    );
   }
 }
