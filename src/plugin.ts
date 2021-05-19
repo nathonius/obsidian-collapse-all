@@ -1,21 +1,28 @@
-import { EventRef, Plugin, WorkspaceLeaf } from 'obsidian';
+import { Plugin, WorkspaceLeaf } from 'obsidian';
 import { COLLAPSE_ALL_ICON } from './constants';
 import { FileExplorerItem } from './interfaces';
 
 export class CollapseAllPlugin extends Plugin {
-  private ref: EventRef | null = null;
-
   async onload(): Promise<void> {
-    this.ref = this.app.workspace.on('active-leaf-change', () => {
+    // Initialize
+    this.app.workspace.onLayoutReady(() => {
       const explorers = this.getFileExplorers();
       explorers.forEach((exp) => {
         this.addCollapseButton(exp);
       });
-
-      // Remove listener.
-      this.app.workspace.offref(this.ref);
     });
 
+    // File explorers that get opened later on
+    this.registerEvent(
+      this.app.workspace.on('layout-change', () => {
+        const explorers = this.getFileExplorers();
+        explorers.forEach((exp) => {
+          this.addCollapseButton(exp);
+        });
+      })
+    );
+
+    // Add to command palette
     this.addCommand({
       id: 'collapse-all-collapse',
       name: 'Collapse all open folders',
@@ -23,6 +30,14 @@ export class CollapseAllPlugin extends Plugin {
       callback: () => {
         this.collapseAll();
       }
+    });
+  }
+
+  onunload(): void {
+    // Remove all collapse buttons
+    const explorers = this.getFileExplorers();
+    explorers.forEach((exp) => {
+      this.removeCollapseButton(exp);
     });
   }
 
@@ -48,6 +63,21 @@ export class CollapseAllPlugin extends Plugin {
       this.collapseAll();
     });
     navContainer.appendChild(newIcon);
+  }
+
+  /**
+   * Remove the collapse button from a given file explorer leaf.
+   */
+  private removeCollapseButton(explorer: WorkspaceLeaf): void {
+    // TODO: containerEl is not a public property of the leaf. Is there a better way?
+    const container = (explorer as any).containerEl as HTMLDivElement;
+    const navContainer = container.querySelector(
+      'div.nav-buttons-container'
+    ) as HTMLDivElement;
+    const button = navContainer.querySelector('.collapse-button');
+    if (button) {
+      button.remove();
+    }
   }
 
   /**
