@@ -65,7 +65,7 @@ export class CollapseAllPlugin extends Plugin {
     // TODO: Better way to get this icon?
     newIcon.innerHTML = COLLAPSE_ALL_ICON;
     newIcon.className = 'nav-action-button collapse-all-plugin-button';
-    newIcon.setAttribute('aria-label', 'Collapse All');
+    newIcon.setAttribute('aria-label', 'Collapse all');
     this.registerDomEvent(newIcon, 'click', () => {
       this.collapseAll(explorer);
     });
