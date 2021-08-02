@@ -1,5 +1,7 @@
 # 1.2.0
 
+## Features
+
 Enabled for mobile app.
 
 # 1.1.0
