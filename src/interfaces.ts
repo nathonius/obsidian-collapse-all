@@ -5,3 +5,9 @@ export interface FileExplorerItem {
   collapsed?: boolean;
   setCollapsed?: (state: boolean) => void;
 }
+
+export interface TagPaneItem {
+  collapsed?: boolean;
+  setCollapsed?: (state: boolean) => void;
+  children: TagPaneItem[];
+}
