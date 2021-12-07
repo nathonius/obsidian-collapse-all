@@ -5,3 +5,10 @@ export interface FileExplorerItem {
   collapsed?: boolean;
   setCollapsed?: (state: boolean) => void;
 }
+
+export interface TagExplorerItem {
+  tag: String;
+  children: TagExplorerItem[];
+  collapsed?: boolean;
+  setCollapsed?: (state: boolean) => void;
+}

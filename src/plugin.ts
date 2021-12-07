@@ -1,12 +1,13 @@
+import * as exp from 'constants';
 import { EventRef, Plugin, TFolder, WorkspaceLeaf } from 'obsidian';
 import { COLLAPSE_ALL_ICON, EXPAND_ALL_ICON } from './constants';
-import { FileExplorerItem } from './interfaces';
+import { FileExplorerItem, TagExplorerItem } from './interfaces';
 
 export class CollapseAllPlugin extends Plugin {
   async onload(): Promise<void> {
     // Initialize
     this.app.workspace.onLayoutReady(() => {
-      const explorers = this.getFileExplorers();
+      const explorers = this.getExplorers();
       explorers.forEach((exp) => {
         this.addCollapseButton(exp);
       });
@@ -15,7 +16,7 @@ export class CollapseAllPlugin extends Plugin {
     // File explorers that get opened later on
     this.registerEvent(
       this.app.workspace.on('layout-change', () => {
-        const explorers = this.getFileExplorers();
+        const explorers = this.getExplorers();
         explorers.forEach((exp) => {
           this.addCollapseButton(exp);
         });
@@ -25,7 +26,7 @@ export class CollapseAllPlugin extends Plugin {
     // Update icon when files are opened
     this.registerEvent(
       this.app.workspace.on('file-open', () => {
-        const explorers = this.getFileExplorers();
+        const explorers = this.getExplorers();
         explorers.forEach((exp) => {
           this.updateButtonIcon(exp);
         });
@@ -38,7 +39,7 @@ export class CollapseAllPlugin extends Plugin {
       name: 'Collapse all open folders in all file explorers',
       icon: 'double-up-arrow-glyph',
       callback: () => {
-        const explorers = this.getFileExplorers();
+        const explorers = this.getExplorers();
         if (explorers) {
           explorers.forEach((exp) => {
             this.collapseAll(exp);
@@ -53,7 +54,7 @@ export class CollapseAllPlugin extends Plugin {
       name: 'Expand closed folders in all file explorers',
       icon: 'double-down-arrow-glyph',
       callback: () => {
-        const explorers = this.getFileExplorers();
+        const explorers = this.getExplorers();
         if (explorers) {
           explorers.forEach((exp) => {
             this.expandAll(exp);
@@ -65,7 +66,7 @@ export class CollapseAllPlugin extends Plugin {
 
   onunload(): void {
     // Remove all collapse buttons
-    const explorers = this.getFileExplorers();
+    const explorers = this.getExplorers();
     explorers.forEach((exp) => {
       this.removeCollapseButton(exp);
     });
@@ -101,10 +102,22 @@ export class CollapseAllPlugin extends Plugin {
     const handler = () => {
       this.updateButtonIcon(explorer, newIcon);
     };
-    explorer.view.containerEl.on('click', '.nav-folder-title', handler);
-    this.register(() => {
-      explorer.view.containerEl.off('click', '.nav-folder-title', handler);
-    });
+    
+    if ( this.isFileExplorer(explorer) ) {
+      explorer.view.containerEl.on('click', '.nav-folder-title', handler);
+      this.register(() => {
+        explorer.view.containerEl.off('click', '.nav-folder-title', handler);
+      });
+    } else {
+      explorer.view.containerEl.on('click', '.tag-pane-tag', handler);
+      this.register(() => {
+        explorer.view.containerEl.off('click', '.tag-pane-tag', handler);
+      });
+    }
+  }
+  
+  private isFileExplorer(explorer: WorkspaceLeaf): boolean {
+    return explorer.view.getViewType() === 'file-explorer';
   }
 
   /**
@@ -122,8 +135,10 @@ export class CollapseAllPlugin extends Plugin {
    */
   private onButtonClick(explorer: WorkspaceLeaf): void {
     if (explorer) {
-      const items = this.getExplorerItems(explorer);
-      const allCollapsed = this.foldersAreCollapsed(items);
+      const allCollapsed = this.isFileExplorer(explorer)
+        ? this.foldersAreCollapsed(this.getExplorerItems(explorer))
+        : this.tagsAreCollapsed(this.getTagItems(explorer));
+
       if (allCollapsed) {
         this.expandAll(explorer);
       } else {
@@ -156,12 +171,21 @@ export class CollapseAllPlugin extends Plugin {
     collapsed: boolean
   ): void {
     if (explorer) {
-      const items = this.getExplorerItems(explorer);
-      items.forEach((item) => {
-        if (this.explorerItemIsFolder(item) && item.collapsed !== collapsed) {
-          item.setCollapsed(collapsed);
-        }
-      });
+      if (this.isFileExplorer(explorer)) {
+        const items = this.getExplorerItems(explorer);
+        items.forEach((item) => {
+          if (this.explorerItemIsFolder(item) && item.collapsed !== collapsed) {
+            item.setCollapsed(collapsed);
+          }
+        });
+      } else {
+        const items = this.getTagItems(explorer);
+        items.forEach((item) => {
+          if (item.children.length > 0 && item.collapsed !== collapsed) {
+            item.setCollapsed(collapsed);
+          }
+        });
+      }
     }
   }
 
@@ -178,8 +202,9 @@ export class CollapseAllPlugin extends Plugin {
       button = this.getCollapseButton(explorer);
     }
     if (button && forceAllCollapsed === undefined) {
-      const items = this.getExplorerItems(explorer);
-      const allCollapsed = this.foldersAreCollapsed(items);
+      const allCollapsed = this.isFileExplorer(explorer)
+        ? this.foldersAreCollapsed(this.getExplorerItems(explorer))
+        : this.tagsAreCollapsed(this.getTagItems(explorer));
       button.innerHTML = allCollapsed ? EXPAND_ALL_ICON : COLLAPSE_ALL_ICON;
       button.setAttribute(
         'aria-label',
@@ -197,10 +222,24 @@ export class CollapseAllPlugin extends Plugin {
   }
 
   /**
+   * Returns all loaded tag leaves
+   */
+  private getExplorers(): WorkspaceLeaf[] {
+    return this.getFileExplorers().concat(this.getTagExplorers());
+  }
+
+  /**
    * Returns all loaded file explorer leaves
    */
   private getFileExplorers(): WorkspaceLeaf[] {
     return this.app.workspace.getLeavesOfType('file-explorer');
+  }
+
+  /**
+   * Returns all loaded tag leaves
+   */
+  private getTagExplorers(): WorkspaceLeaf[] {
+    return this.app.workspace.getLeavesOfType('tag');
   }
 
   /**
@@ -238,6 +277,24 @@ export class CollapseAllPlugin extends Plugin {
   private foldersAreCollapsed(items: FileExplorerItem[]): boolean {
     return items.every(
       (i) => !this.explorerItemIsFolder(i) || i.collapsed === true
+    );
+  }
+
+  /**
+   * Get all `tagItems` from tag view. This property is not documented.
+   */
+  private getTagItems(explorer: WorkspaceLeaf): TagExplorerItem[] {
+    return Object.values(
+      (explorer.view as any).tagDoms
+    ) as TagExplorerItem[];
+  }
+
+  /**
+   * Returns true if every folder in the given items (files and folders) is collapsed
+   */
+  private tagsAreCollapsed(items: TagExplorerItem[]): boolean {
+    return items.every(
+      (i) => i.children.length === 0 || i.collapsed === true
     );
   }
 }
