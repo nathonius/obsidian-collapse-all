@@ -1,3 +1,9 @@
+# 1.3.0
+
+## Features
+
+Expanded functionality to tag pane. (@ebullient)
+
 # 1.2.0
 
 ## Features

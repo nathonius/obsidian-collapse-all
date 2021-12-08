@@ -1,6 +1,6 @@
 {
   "name": "obsidian-collapse-all-plugin",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "This plugin adds a button to collapse all folders in the file explorer.",
   "main": "main.js",
   "scripts": {
