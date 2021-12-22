@@ -7,7 +7,7 @@ export interface FileExplorerItem {
 }
 
 export interface TagExplorerItem {
-  tag: String;
+  tag: string;
   children: TagExplorerItem[];
   collapsed?: boolean;
   setCollapsed?: (state: boolean) => void;
