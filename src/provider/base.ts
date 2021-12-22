@@ -20,16 +20,44 @@ export abstract class ProviderBase {
   protected abstract readonly leafType: string;
 
   /**
+   * Name for the collapse command
+   */
+  protected abstract readonly collapseCommandName: string;
+
+  /**
+   * Name for the expand command
+   */
+  protected abstract readonly expandCommandName: string;
+
+  constructor(protected plugin: Plugin) {}
+
+  /**
    * Collapse command config
    */
-  abstract readonly collapseCommand: Command;
+  get collapseCommand(): Command {
+    return {
+      id: `collapse-all-collapse-${this.leafType}`,
+      name: this.collapseCommandName,
+      icon: 'double-up-arrow-glyph',
+      callback: () => {
+        this.collapseAll();
+      }
+    };
+  }
 
   /**
    * Expand command config
    */
-  abstract readonly expandCommand: Command;
-
-  constructor(protected plugin: Plugin) {}
+  get expandCommand(): Command {
+    return {
+      id: `collapse-all-expand-${this.leafType}`,
+      name: this.expandCommandName,
+      icon: 'double-down-arrow-glyph',
+      callback: () => {
+        this.expandAll();
+      }
+    };
+  }
 
   /**
    * Collapse or expand all items for the given leaf
@@ -47,8 +75,8 @@ export abstract class ProviderBase {
   /**
    * Collapse all open items in the given leaf or all leaves
    */
-  public collapseAll(leaf?: WorkspaceLeaf): void {
-    const leaves = leaf ? [leaf] : this.leaves;
+  public collapseAll(singleLeaf?: WorkspaceLeaf): void {
+    const leaves = singleLeaf ? [singleLeaf] : this.leaves;
     leaves.forEach((leaf) => {
       this.collapseOrExpandAll(leaf, true);
       this.updateButtonIcon(leaf, undefined, true);
@@ -58,8 +86,8 @@ export abstract class ProviderBase {
   /**
    * Expand all collapsed items in the given leaf or all leaves
    */
-  public expandAll(leaf?: WorkspaceLeaf): void {
-    const leaves = leaf ? [leaf] : this.leaves;
+  public expandAll(singleLeaf?: WorkspaceLeaf): void {
+    const leaves = singleLeaf ? [singleLeaf] : this.leaves;
     leaves.forEach((leaf) => {
       this.collapseOrExpandAll(leaf, false);
       this.updateButtonIcon(leaf, undefined, false);
@@ -72,9 +100,7 @@ export abstract class ProviderBase {
   public addCollapseButtons(): void {
     this.leaves.forEach((leaf) => {
       const container = leaf.view.containerEl as HTMLDivElement;
-      const navContainer = container.querySelector(
-        'div.nav-buttons-container'
-      ) as HTMLDivElement;
+      const navContainer = container.querySelector('div.nav-buttons-container');
       if (!navContainer) {
         return null;
       }

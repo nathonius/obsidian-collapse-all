@@ -39,7 +39,6 @@ export class CollapseAllPlugin extends Plugin {
     );
 
     // Add global collapse command to palette
-    // Global
     this.addCommand({
       id: 'collapse-all-collapse',
       name: 'Collapse open items in all supported explorers',
@@ -58,7 +57,7 @@ export class CollapseAllPlugin extends Plugin {
       icon: 'double-down-arrow-glyph',
       callback: () => {
         this.allProviders.forEach((provider) => {
-          provider.collapseAll();
+          provider.expandAll();
         });
       }
     });
