@@ -1,24 +1,30 @@
-import * as exp from 'constants';
-import { EventRef, Plugin, TFolder, WorkspaceLeaf } from 'obsidian';
-import { COLLAPSE_ALL_ICON, EXPAND_ALL_ICON } from './constants';
-import { FileExplorerItem, TagExplorerItem } from './interfaces';
+import { Plugin } from 'obsidian';
+import { FileExplorerProvider, TagPaneProvider } from './provider';
+import { ProviderBase } from './provider/base';
 
 export class CollapseAllPlugin extends Plugin {
+  providers = {
+    fileExplorer: new FileExplorerProvider(this),
+    tag: new TagPaneProvider(this)
+  };
+
+  get allProviders(): ProviderBase[] {
+    return Object.values(this.providers);
+  }
+
   async onload(): Promise<void> {
     // Initialize
     this.app.workspace.onLayoutReady(() => {
-      const explorers = this.getExplorers();
-      explorers.forEach((exp) => {
-        this.addCollapseButton(exp);
+      this.allProviders.forEach((provider) => {
+        provider.addCollapseButtons();
       });
     });
 
     // File explorers that get opened later on
     this.registerEvent(
       this.app.workspace.on('layout-change', () => {
-        const explorers = this.getExplorers();
-        explorers.forEach((exp) => {
-          this.addCollapseButton(exp);
+        this.allProviders.forEach((provider) => {
+          provider.addCollapseButtons();
         });
       })
     );
@@ -26,9 +32,8 @@ export class CollapseAllPlugin extends Plugin {
     // Update icon when files are opened
     this.registerEvent(
       this.app.workspace.on('file-open', () => {
-        const explorers = this.getExplorers();
-        explorers.forEach((exp) => {
-          this.updateButtonIcon(exp);
+        this.allProviders.forEach((provider) => {
+          provider.updateButtonIcons();
         });
       })
     );
@@ -39,12 +44,9 @@ export class CollapseAllPlugin extends Plugin {
       name: 'Collapse all open folders in all file explorers',
       icon: 'double-up-arrow-glyph',
       callback: () => {
-        const explorers = this.getExplorers();
-        if (explorers) {
-          explorers.forEach((exp) => {
-            this.collapseAll(exp);
-          });
-        }
+        this.allProviders.forEach((provider) => {
+          provider.collapseAll();
+        });
       }
     });
 
@@ -54,247 +56,17 @@ export class CollapseAllPlugin extends Plugin {
       name: 'Expand closed folders in all file explorers',
       icon: 'double-down-arrow-glyph',
       callback: () => {
-        const explorers = this.getExplorers();
-        if (explorers) {
-          explorers.forEach((exp) => {
-            this.expandAll(exp);
-          });
-        }
+        this.allProviders.forEach((provider) => {
+          provider.collapseAll();
+        });
       }
     });
   }
 
   onunload(): void {
     // Remove all collapse buttons
-    const explorers = this.getExplorers();
-    explorers.forEach((exp) => {
-      this.removeCollapseButton(exp);
+    this.allProviders.forEach((provider) => {
+      provider.removeCollapseButtons();
     });
-  }
-
-  /**
-   * Adds the collapse button to a file explorer leaf.
-   * Returns the newly created button element or the old one if already there.
-   */
-  private addCollapseButton(explorer: WorkspaceLeaf): void {
-    const container = explorer.view.containerEl as HTMLDivElement;
-    const navContainer = container.querySelector(
-      'div.nav-buttons-container'
-    ) as HTMLDivElement;
-    if (!navContainer) {
-      return null;
-    }
-
-    const existingButton = this.getCollapseButton(explorer);
-    if (existingButton) {
-      return;
-    }
-
-    const newIcon = document.createElement('div');
-    this.updateButtonIcon(explorer, newIcon);
-    newIcon.className = 'nav-action-button collapse-all-plugin-button';
-    this.registerDomEvent(newIcon, 'click', () => {
-      this.onButtonClick(explorer);
-    });
-    navContainer.appendChild(newIcon);
-
-    // Register click handler on explorer to toggle button icon
-    const handler = () => {
-      this.updateButtonIcon(explorer, newIcon);
-    };
-    
-    if ( this.isFileExplorer(explorer) ) {
-      explorer.view.containerEl.on('click', '.nav-folder-title', handler);
-      this.register(() => {
-        explorer.view.containerEl.off('click', '.nav-folder-title', handler);
-      });
-    } else {
-      explorer.view.containerEl.on('click', '.tag-pane-tag', handler);
-      this.register(() => {
-        explorer.view.containerEl.off('click', '.tag-pane-tag', handler);
-      });
-    }
-  }
-  
-  private isFileExplorer(explorer: WorkspaceLeaf): boolean {
-    return explorer.view.getViewType() === 'file-explorer';
-  }
-
-  /**
-   * Remove the collapse button from a given file explorer leaf.
-   */
-  private removeCollapseButton(explorer: WorkspaceLeaf): void {
-    const button = this.getCollapseButton(explorer);
-    if (button) {
-      button.remove();
-    }
-  }
-
-  /**
-   * Collapses or expands all folders in the given file explorer
-   */
-  private onButtonClick(explorer: WorkspaceLeaf): void {
-    if (explorer) {
-      const allCollapsed = this.isFileExplorer(explorer)
-        ? this.foldersAreCollapsed(this.getExplorerItems(explorer))
-        : this.tagsAreCollapsed(this.getTagItems(explorer));
-
-      if (allCollapsed) {
-        this.expandAll(explorer);
-      } else {
-        this.collapseAll(explorer);
-      }
-    }
-  }
-
-  /**
-   * Collapse all open folders in the given file explorer
-   */
-  private collapseAll(explorer: WorkspaceLeaf): void {
-    this.collapseOrExpandAll(explorer, true);
-    this.updateButtonIcon(explorer, undefined, true);
-  }
-
-  /**
-   * Expand all collapsed folders in the given file explorer
-   */
-  private expandAll(explorer: WorkspaceLeaf): void {
-    this.collapseOrExpandAll(explorer, false);
-    this.updateButtonIcon(explorer, undefined, false);
-  }
-
-  /**
-   * Collapse or expand all folders for the given file explorer
-   */
-  private collapseOrExpandAll(
-    explorer: WorkspaceLeaf,
-    collapsed: boolean
-  ): void {
-    if (explorer) {
-      if (this.isFileExplorer(explorer)) {
-        const items = this.getExplorerItems(explorer);
-        items.forEach((item) => {
-          if (this.explorerItemIsFolder(item) && item.collapsed !== collapsed) {
-            item.setCollapsed(collapsed);
-          }
-        });
-      } else {
-        const items = this.getTagItems(explorer);
-        items.forEach((item) => {
-          if (item.children.length > 0 && item.collapsed !== collapsed) {
-            item.setCollapsed(collapsed);
-          }
-        });
-      }
-    }
-  }
-
-  /**
-   * Update icon for given explorer/button to collapse/expand all.
-   * Providing the forceAllCollapsed parameter will skip checking and assume that state
-   */
-  private updateButtonIcon(
-    explorer: WorkspaceLeaf,
-    button?: HTMLElement,
-    forceAllCollapsed?: boolean
-  ): void {
-    if (!button) {
-      button = this.getCollapseButton(explorer);
-    }
-    if (button && forceAllCollapsed === undefined) {
-      const allCollapsed = this.isFileExplorer(explorer)
-        ? this.foldersAreCollapsed(this.getExplorerItems(explorer))
-        : this.tagsAreCollapsed(this.getTagItems(explorer));
-      button.innerHTML = allCollapsed ? EXPAND_ALL_ICON : COLLAPSE_ALL_ICON;
-      button.setAttribute(
-        'aria-label',
-        allCollapsed ? 'Expand all' : 'Collapse all'
-      );
-    } else if (button) {
-      button.innerHTML = forceAllCollapsed
-        ? EXPAND_ALL_ICON
-        : COLLAPSE_ALL_ICON;
-      button.setAttribute(
-        'aria-label',
-        forceAllCollapsed ? 'Expand all' : 'Collapse all'
-      );
-    }
-  }
-
-  /**
-   * Returns all loaded tag leaves
-   */
-  private getExplorers(): WorkspaceLeaf[] {
-    return this.getFileExplorers().concat(this.getTagExplorers());
-  }
-
-  /**
-   * Returns all loaded file explorer leaves
-   */
-  private getFileExplorers(): WorkspaceLeaf[] {
-    return this.app.workspace.getLeavesOfType('file-explorer');
-  }
-
-  /**
-   * Returns all loaded tag leaves
-   */
-  private getTagExplorers(): WorkspaceLeaf[] {
-    return this.app.workspace.getLeavesOfType('tag');
-  }
-
-  /**
-   * Get the collapse button for a given file explorer, if it exists
-   */
-  private getCollapseButton(explorer: WorkspaceLeaf): HTMLDivElement | null {
-    return explorer.view.containerEl.querySelector(
-      '.collapse-all-plugin-button'
-    );
-  }
-
-  /**
-   * Get all `fileItems` on explorer view. This property is not documented.
-   */
-  private getExplorerItems(explorer: WorkspaceLeaf): FileExplorerItem[] {
-    return Object.values(
-      (explorer.view as any).fileItems
-    ) as FileExplorerItem[];
-  }
-
-  /**
-   * Ensures given explorer item is a folder and not the root or a note
-   */
-  private explorerItemIsFolder(item: FileExplorerItem): boolean {
-    return (
-      item.file instanceof TFolder &&
-      item.file.path !== '/' &&
-      item.collapsed !== undefined
-    );
-  }
-
-  /**
-   * Returns true if every folder in the given items (files and folders) is collapsed
-   */
-  private foldersAreCollapsed(items: FileExplorerItem[]): boolean {
-    return items.every(
-      (i) => !this.explorerItemIsFolder(i) || i.collapsed === true
-    );
-  }
-
-  /**
-   * Get all `tagItems` from tag view. This property is not documented.
-   */
-  private getTagItems(explorer: WorkspaceLeaf): TagExplorerItem[] {
-    return Object.values(
-      (explorer.view as any).tagDoms
-    ) as TagExplorerItem[];
-  }
-
-  /**
-   * Returns true if every folder in the given items (files and folders) is collapsed
-   */
-  private tagsAreCollapsed(items: TagExplorerItem[]): boolean {
-    return items.every(
-      (i) => i.children.length === 0 || i.collapsed === true
-    );
   }
 }
