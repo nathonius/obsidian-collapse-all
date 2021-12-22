@@ -38,10 +38,11 @@ export class CollapseAllPlugin extends Plugin {
       })
     );
 
-    // Add collapse command to palette
+    // Add global collapse command to palette
+    // Global
     this.addCommand({
       id: 'collapse-all-collapse',
-      name: 'Collapse all open folders in all file explorers',
+      name: 'Collapse open items in all supported explorers',
       icon: 'double-up-arrow-glyph',
       callback: () => {
         this.allProviders.forEach((provider) => {
@@ -50,16 +51,22 @@ export class CollapseAllPlugin extends Plugin {
       }
     });
 
-    // Add expand command to palette
+    // Add global expand command to palette
     this.addCommand({
       id: 'collapse-all-expand',
-      name: 'Expand closed folders in all file explorers',
+      name: 'Expand closed items in all supported explorers',
       icon: 'double-down-arrow-glyph',
       callback: () => {
         this.allProviders.forEach((provider) => {
           provider.collapseAll();
         });
       }
+    });
+
+    // Add individual commands for each provider
+    this.allProviders.forEach((provider) => {
+      this.addCommand(provider.collapseCommand);
+      this.addCommand(provider.expandCommand);
     });
   }
 

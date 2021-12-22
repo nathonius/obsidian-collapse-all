@@ -1,4 +1,4 @@
-import { Plugin, WorkspaceLeaf } from 'obsidian';
+import { Command, Plugin, WorkspaceLeaf } from 'obsidian';
 import { COLLAPSE_ALL_ICON, EXPAND_ALL_ICON } from 'src/constants';
 
 export abstract class ProviderBase {
@@ -18,6 +18,16 @@ export abstract class ProviderBase {
    * The leaf type for getLeavesOfType
    */
   protected abstract readonly leafType: string;
+
+  /**
+   * Collapse command config
+   */
+  abstract readonly collapseCommand: Command;
+
+  /**
+   * Expand command config
+   */
+  abstract readonly expandCommand: Command;
 
   constructor(protected plugin: Plugin) {}
 
