@@ -24,7 +24,7 @@ export class CollapseAllPlugin extends Plugin {
     // Initialize
     this.app.workspace.onLayoutReady(() => {
       this.allProviders.forEach((provider) => {
-        provider.addCollapseButtons();
+        provider.addButtons();
       });
     });
 
@@ -32,7 +32,7 @@ export class CollapseAllPlugin extends Plugin {
     this.registerEvent(
       this.app.workspace.on('layout-change', () => {
         this.allProviders.forEach((provider) => {
-          provider.addCollapseButtons();
+          provider.addButtons();
         });
       })
     );
@@ -40,9 +40,11 @@ export class CollapseAllPlugin extends Plugin {
     // Update icon when files are opened
     this.registerEvent(
       this.app.workspace.on('file-open', () => {
-        this.allProviders.forEach((provider) => {
-          provider.updateButtonIcons();
-        });
+        if (!this.settings.splitButtons) {
+          this.allProviders.forEach((provider) => {
+            provider.updateButtonIcons();
+          });
+        }
       })
     );
 

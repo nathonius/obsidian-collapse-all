@@ -1,6 +1,7 @@
-import { Plugin, TFolder, WorkspaceLeaf } from 'obsidian';
-import { ProviderType } from 'src/constants';
-import { FileExplorerItem } from 'src/interfaces';
+import { TFolder, WorkspaceLeaf } from 'obsidian';
+import { CollapseAllPlugin } from '../plugin';
+import { ProviderType } from '../constants';
+import { FileExplorerItem } from '../interfaces';
 import { ProviderBase } from './base';
 
 export class FileExplorerProvider extends ProviderBase {
@@ -12,7 +13,7 @@ export class FileExplorerProvider extends ProviderBase {
   protected collapseCommandName = 'Collapse open folders in all file explorers';
   protected expandCommandName = 'Expand closed folders in all file explorers';
 
-  constructor(plugin: Plugin) {
+  constructor(plugin: CollapseAllPlugin) {
     super(plugin);
   }
 
