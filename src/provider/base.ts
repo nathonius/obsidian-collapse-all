@@ -1,7 +1,18 @@
-import { Command, Plugin, WorkspaceLeaf } from 'obsidian';
-import { COLLAPSE_ALL_ICON, EXPAND_ALL_ICON } from 'src/constants';
+import { Command, WorkspaceLeaf } from 'obsidian';
+import { COLLAPSE_ALL_ICON, EXPAND_ALL_ICON, ProviderType } from '../constants';
+import { CollapseAllPlugin } from '../plugin';
 
 export abstract class ProviderBase {
+  /**
+   * ProviderType, used for configuration
+   */
+  abstract readonly providerType: ProviderType;
+
+  /**
+   * Used when adding UI
+   */
+  abstract readonly displayName: string;
+
   /**
    * Class that should be added to the collapse button.
    * Likely 'nav-action-button'.
@@ -29,7 +40,7 @@ export abstract class ProviderBase {
    */
   protected abstract readonly expandCommandName: string;
 
-  constructor(protected plugin: Plugin) {}
+  constructor(protected plugin: CollapseAllPlugin) {}
 
   /**
    * Collapse command config
@@ -75,29 +86,33 @@ export abstract class ProviderBase {
   /**
    * Collapse all open items in the given leaf or all leaves
    */
-  public collapseAll(singleLeaf?: WorkspaceLeaf): void {
+  public collapseAll(updateIcon = true, singleLeaf?: WorkspaceLeaf): void {
     const leaves = singleLeaf ? [singleLeaf] : this.leaves;
     leaves.forEach((leaf) => {
       this.collapseOrExpandAll(leaf, true);
-      this.updateButtonIcon(leaf, undefined, true);
+      if (updateIcon) {
+        this.updateButtonIcon(leaf, undefined, true);
+      }
     });
   }
 
   /**
    * Expand all collapsed items in the given leaf or all leaves
    */
-  public expandAll(singleLeaf?: WorkspaceLeaf): void {
+  public expandAll(updateIcon = true, singleLeaf?: WorkspaceLeaf): void {
     const leaves = singleLeaf ? [singleLeaf] : this.leaves;
     leaves.forEach((leaf) => {
       this.collapseOrExpandAll(leaf, false);
-      this.updateButtonIcon(leaf, undefined, false);
+      if (updateIcon) {
+        this.updateButtonIcon(leaf, undefined, false);
+      }
     });
   }
 
   /**
    * Adds collapse buttons to all leaves.
    */
-  public addCollapseButtons(): void {
+  public addButtons(): void {
     this.leaves.forEach((leaf) => {
       const container = leaf.view.containerEl as HTMLDivElement;
       const navContainer = container.querySelector('div.nav-buttons-container');
@@ -105,28 +120,61 @@ export abstract class ProviderBase {
         return null;
       }
 
-      const existingButton = this.getCollapseButton(leaf);
-      if (existingButton) {
-        return;
+      if (!this.plugin.settings.splitButtons) {
+        this.addSingleButton(leaf, navContainer);
+      } else {
+        this.addSplitButtons(leaf, navContainer);
       }
-
-      const newIcon = document.createElement('div');
-      this.updateButtonIcon(leaf, newIcon);
-      newIcon.className = `${this.collapseButtonClass} collapse-all-plugin-button`;
-      this.plugin.registerDomEvent(newIcon, 'click', () => {
-        this.onButtonClick(leaf);
-      });
-      navContainer.appendChild(newIcon);
-
-      // Register click handler on leaf to toggle button icon
-      const handler = () => {
-        this.updateButtonIcon(leaf, newIcon);
-      };
-      leaf.view.containerEl.on('click', this.collapseClickTarget, handler);
-      this.plugin.register(() => {
-        leaf.view.containerEl.off('click', this.collapseClickTarget, handler);
-      });
     });
+  }
+
+  private addSingleButton(leaf: WorkspaceLeaf, navContainer: Element): void {
+    const existingButton = this.getCollapseButtons(leaf)[0];
+    if (existingButton) {
+      return;
+    }
+
+    const newIcon = document.createElement('div');
+    this.updateButtonIcon(leaf, newIcon);
+    newIcon.className = `${this.collapseButtonClass} collapse-all-plugin-button`;
+    this.plugin.registerDomEvent(newIcon, 'click', () => {
+      this.onSingleButtonClick(leaf);
+    });
+    navContainer.appendChild(newIcon);
+
+    // Register click handler on leaf to toggle button icon
+    const handler = () => {
+      this.updateButtonIcon(leaf, newIcon);
+    };
+    leaf.view.containerEl.on('click', this.collapseClickTarget, handler);
+    this.plugin.register(() => {
+      leaf.view.containerEl.off('click', this.collapseClickTarget, handler);
+    });
+  }
+
+  private addSplitButtons(leaf: WorkspaceLeaf, navContainer: Element): void {
+    const existingButtons = this.getCollapseButtons(leaf);
+    if (existingButtons.length == 2) {
+      return;
+    }
+
+    // Add collapse button
+    const collapseButton = document.createElement('div');
+    this.updateButtonIcon(leaf, collapseButton, false);
+    collapseButton.className = `${this.collapseButtonClass} collapse-all-plugin-button`;
+    this.plugin.registerDomEvent(collapseButton, 'click', () => {
+      this.collapseAll(false, leaf);
+    });
+    navContainer.appendChild(collapseButton);
+
+    // Add expand button
+    const expandButton = document.createElement('div');
+    this.updateButtonIcon(leaf, expandButton, true);
+    expandButton.className = `${this.collapseButtonClass} collapse-all-plugin-button`;
+    this.plugin.registerDomEvent(expandButton, 'click', () => {
+      this.expandAll(false, leaf);
+    });
+    navContainer.appendChild(expandButton);
   }
 
   /**
@@ -143,10 +191,10 @@ export abstract class ProviderBase {
    */
   public removeCollapseButtons(): void {
     this.leaves.forEach((leaf) => {
-      const button = this.getCollapseButton(leaf);
-      if (button) {
+      const buttons = this.getCollapseButtons(leaf);
+      buttons.forEach((button) => {
         button.remove();
-      }
+      });
     });
   }
 
@@ -160,8 +208,10 @@ export abstract class ProviderBase {
   /**
    * Get the collapse button for a given leaf, if it exists
    */
-  private getCollapseButton(leaf: WorkspaceLeaf): HTMLDivElement | null {
-    return leaf.view.containerEl.querySelector('.collapse-all-plugin-button');
+  private getCollapseButtons(leaf: WorkspaceLeaf): NodeListOf<HTMLDivElement> {
+    return leaf.view.containerEl.querySelectorAll(
+      '.collapse-all-plugin-button'
+    );
   }
 
   /**
@@ -174,7 +224,7 @@ export abstract class ProviderBase {
     forceAllCollapsed?: boolean
   ): void {
     if (!button) {
-      button = this.getCollapseButton(leaf);
+      button = this.getCollapseButtons(leaf)[0] || null;
     }
     if (button && forceAllCollapsed === undefined) {
       const allCollapsed = this.allCollapsed(leaf);
@@ -197,12 +247,12 @@ export abstract class ProviderBase {
   /**
    * Collapses or expands all items in the given leaf
    */
-  private onButtonClick(leaf: WorkspaceLeaf): void {
+  private onSingleButtonClick(leaf: WorkspaceLeaf): void {
     if (leaf) {
       if (this.allCollapsed(leaf)) {
-        this.expandAll(leaf);
+        this.expandAll(true, leaf);
       } else {
-        this.collapseAll(leaf);
+        this.collapseAll(true, leaf);
       }
     }
   }

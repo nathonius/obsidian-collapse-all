@@ -1,15 +1,19 @@
-import { Plugin, TFolder, WorkspaceLeaf } from 'obsidian';
-import { FileExplorerItem } from 'src/interfaces';
+import { TFolder, WorkspaceLeaf } from 'obsidian';
+import { CollapseAllPlugin } from '../plugin';
+import { ProviderType } from '../constants';
+import { FileExplorerItem } from '../interfaces';
 import { ProviderBase } from './base';
 
 export class FileExplorerProvider extends ProviderBase {
+  providerType: ProviderType = ProviderType.FileExplorer;
+  displayName = 'File Explorer';
   protected collapseButtonClass = 'nav-action-button';
   protected collapseClickTarget = '.nav-folder-title';
   protected leafType = 'file-explorer';
   protected collapseCommandName = 'Collapse open folders in all file explorers';
   protected expandCommandName = 'Expand closed folders in all file explorers';
 
-  constructor(plugin: Plugin) {
+  constructor(plugin: CollapseAllPlugin) {
     super(plugin);
   }
 

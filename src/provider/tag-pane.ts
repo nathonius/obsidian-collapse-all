@@ -1,15 +1,19 @@
-import { Plugin, WorkspaceLeaf } from 'obsidian';
-import { TagExplorerItem } from 'src/interfaces';
+import { WorkspaceLeaf } from 'obsidian';
+import { CollapseAllPlugin } from '../plugin';
+import { ProviderType } from '../constants';
+import { TagExplorerItem } from '../interfaces';
 import { ProviderBase } from './base';
 
 export class TagPaneProvider extends ProviderBase {
+  providerType: ProviderType = ProviderType.TagPane;
+  displayName = 'Tag Pane';
   protected collapseButtonClass = 'nav-action-button';
   protected collapseClickTarget = '.tag-container .tree-item';
   protected leafType = 'tag';
   protected collapseCommandName = 'Collapse open tags in all tag explorers';
   protected expandCommandName = 'Expand closed tags in all tag explorers';
 
-  constructor(plugin: Plugin) {
+  constructor(plugin: CollapseAllPlugin) {
     super(plugin);
   }
 
