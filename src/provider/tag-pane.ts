@@ -1,8 +1,11 @@
 import { Plugin, WorkspaceLeaf } from 'obsidian';
+import { ProviderType } from 'src/constants';
 import { TagExplorerItem } from 'src/interfaces';
 import { ProviderBase } from './base';
 
 export class TagPaneProvider extends ProviderBase {
+  providerType: ProviderType = ProviderType.TagPane;
+  displayName = 'Tag Pane';
   protected collapseButtonClass = 'nav-action-button';
   protected collapseClickTarget = '.tag-container .tree-item';
   protected leafType = 'tag';

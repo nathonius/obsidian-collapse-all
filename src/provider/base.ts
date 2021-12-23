@@ -1,7 +1,21 @@
 import { Command, Plugin, WorkspaceLeaf } from 'obsidian';
-import { COLLAPSE_ALL_ICON, EXPAND_ALL_ICON } from 'src/constants';
+import {
+  COLLAPSE_ALL_ICON,
+  EXPAND_ALL_ICON,
+  ProviderType
+} from 'src/constants';
 
 export abstract class ProviderBase {
+  /**
+   * ProviderType, used for configuration
+   */
+  abstract readonly providerType: ProviderType;
+
+  /**
+   * Used when adding UI
+   */
+  abstract readonly displayName: string;
+
   /**
    * Class that should be added to the collapse button.
    * Likely 'nav-action-button'.

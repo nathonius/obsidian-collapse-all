@@ -1,8 +1,11 @@
 import { Plugin, TFolder, WorkspaceLeaf } from 'obsidian';
+import { ProviderType } from 'src/constants';
 import { FileExplorerItem } from 'src/interfaces';
 import { ProviderBase } from './base';
 
 export class FileExplorerProvider extends ProviderBase {
+  providerType: ProviderType = ProviderType.FileExplorer;
+  displayName = 'File Explorer';
   protected collapseButtonClass = 'nav-action-button';
   protected collapseClickTarget = '.nav-folder-title';
   protected leafType = 'file-explorer';

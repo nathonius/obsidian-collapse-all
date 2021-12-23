@@ -1,4 +1,10 @@
 import { TFile, TFolder } from 'obsidian';
+import { ProviderType } from './constants';
+
+export interface Settings {
+  commands: Record<ProviderType | 'global', boolean>;
+  splitButtons: boolean;
+}
 
 export interface FileExplorerItem {
   file: TFile | TFolder;
