@@ -1,7 +1,8 @@
-// import { writeFileSync } from 'fs';
+import { writeFileSync } from 'fs';
 
-const tagDepth = 2;
-const perLevel = 3;
+const tagDepth = 6;
+const perLevel = 9;
+const outputPath = '/mnt/c/Users/Nathan/Documents/test-vault';
 
 // Output ['#0/0/0/0', '#0/0/0/1', '#0/0/0/2']
 
@@ -28,11 +29,7 @@ for (let i = 0; i < tagDepth; i++) {
   cartesianArgs.push(cartArray);
 }
 
-// console.log(cartesianArgs);
-// console.log(cartesianProduct(...cartesianArgs));
-
 const cartOutput = cartesianProduct(...cartesianArgs);
-console.log(cartOutput);
 const tags = cartOutput.map((product) => `#${product.join('/')}`);
 
-console.log(tags);
+writeFileSync(`${outputPath}/lots-of-tags.md`, tags.join('\n'));
