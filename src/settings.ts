@@ -28,6 +28,7 @@ export class CollapseAllPluginSettings extends PluginSettingTab {
             await this.plugin.saveSettings();
           });
       });
+
     new Setting(this.containerEl)
       .setName('Folder context menu')
       .setDesc(
@@ -39,6 +40,21 @@ export class CollapseAllPluginSettings extends PluginSettingTab {
           .setValue(this.plugin.settings.folderContextMenu)
           .onChange(async (value) => {
             this.plugin.settings.folderContextMenu = value;
+            await this.plugin.saveSettings();
+          });
+      });
+
+    new Setting(this.containerEl)
+      .setName('Expand attachment folder')
+      .setDesc(
+        'If enabled, the attachment folder will be expanded with other folders. Otherwise, it will be skipped.'
+      )
+      .addToggle((toggle) => {
+        toggle
+          .setTooltip('Expand attachment folder')
+          .setValue(this.plugin.settings.expandAttachmentFolder)
+          .onChange(async (value) => {
+            this.plugin.settings.expandAttachmentFolder = value;
             await this.plugin.saveSettings();
           });
       });

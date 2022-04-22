@@ -54,6 +54,13 @@ export class FileExplorerProvider extends ProviderBase {
     }
     items.forEach((item) => {
       if (this.explorerItemIsFolder(item) && item.collapsed !== collapsed) {
+        if (
+          collapsed === false &&
+          this.expandAttachmentFolder === false &&
+          this.folderIsAttachmentFolder(item.file as TFolder)
+        ) {
+          return;
+        }
         item.setCollapsed(collapsed);
       }
     });
@@ -64,6 +71,14 @@ export class FileExplorerProvider extends ProviderBase {
     return items.every(
       (i) => !this.explorerItemIsFolder(i) || i.collapsed === true
     );
+  }
+
+  private get attachmentFolder(): string {
+    return (this.plugin.app.vault as any).config.attachmentFolderPath || '';
+  }
+
+  private get expandAttachmentFolder(): boolean {
+    return this.plugin.settings.expandAttachmentFolder;
   }
 
   /**
@@ -96,5 +111,21 @@ export class FileExplorerProvider extends ProviderBase {
       item.file.path !== '/' &&
       item.collapsed !== undefined
     );
+  }
+
+  private folderIsAttachmentFolder(folder: TFolder): boolean {
+    if (!this.attachmentFolder || this.attachmentFolder === './') {
+      return false;
+    }
+    if (folder.path === this.attachmentFolder) {
+      return true;
+    }
+    if (
+      this.attachmentFolder.startsWith('./') &&
+      folder.path.endsWith(this.attachmentFolder.slice(1))
+    ) {
+      return true;
+    }
+    return false;
   }
 }

@@ -13,6 +13,7 @@ export const DEFAULT_SETTINGS: Settings = {
     TagPane: false
   },
   folderContextMenu: true,
+  expandAttachmentFolder: false,
   splitButtons: false
 };
 
