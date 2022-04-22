@@ -4,6 +4,7 @@ import { ProviderType } from './constants';
 export interface Settings {
   commands: Record<ProviderType | 'global', boolean>;
   folderContextMenu: boolean;
+  expandAttachmentFolder: boolean;
   splitButtons: boolean;
 }
 

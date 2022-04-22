@@ -16,6 +16,10 @@ To expand all folders, either click the new button at the top of the file explor
 
 Right click on a folder in the file explorer and select "Collapse this level" or "Expand this level" to collapse or expand only that folder and its children.
 
+### Expand Attachment Folder
+
+By default the configured attachment folder will not be expanded (if one is configured). This is configurable in plugin settings.
+
 ![CollapseAll](docs/CollapseAll.gif)
 
 ## Changelog
