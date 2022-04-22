@@ -12,6 +12,7 @@ export const DEFAULT_SETTINGS: Settings = {
     FileExplorer: false,
     TagPane: false
   },
+  folderContextMenu: true,
   splitButtons: false
 };
 

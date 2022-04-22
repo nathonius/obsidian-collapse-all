@@ -3,6 +3,7 @@ import { ProviderType } from './constants';
 
 export interface Settings {
   commands: Record<ProviderType | 'global', boolean>;
+  folderContextMenu: boolean;
   splitButtons: boolean;
 }
 

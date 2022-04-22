@@ -1,4 +1,4 @@
-import { TFolder, WorkspaceLeaf } from 'obsidian';
+import { Menu, TAbstractFile, TFolder, WorkspaceLeaf } from 'obsidian';
 import { CollapseAllPlugin } from '../plugin';
 import { ProviderType } from '../constants';
 import { FileExplorerItem } from '../interfaces';
@@ -17,8 +17,41 @@ export class FileExplorerProvider extends ProviderBase {
     super(plugin);
   }
 
-  protected collapseOrExpandAll(leaf: WorkspaceLeaf, collapsed: boolean): void {
-    const items = this.getExplorerItems(leaf);
+  handleMenu(menu: Menu, file: TAbstractFile, source: string): void {
+    if (
+      this.plugin.settings.folderContextMenu &&
+      source === 'file-explorer-context-menu' &&
+      file instanceof TFolder
+    ) {
+      const leaf = this.plugin.app.workspace
+        .getLeavesOfType('file-explorer')
+        .first();
+      menu.addItem((item) => {
+        item
+          .setTitle('Collapse this level')
+          .setIcon('double-up-arrow-glyph')
+          .onClick(() => this.collapseOrExpandAll(leaf, true, file));
+      });
+      menu.addItem((item) => {
+        item
+          .setTitle('Expand this level')
+          .setIcon('double-down-arrow-glyph')
+          .onClick(() => this.collapseOrExpandAll(leaf, false, file));
+      });
+    }
+  }
+
+  protected override collapseOrExpandAll(
+    leaf: WorkspaceLeaf,
+    collapsed: boolean,
+    parentFolder: TFolder | null = null
+  ): void {
+    let items: FileExplorerItem[] = [];
+    if (parentFolder) {
+      items = this.getCurrentLevelItems(leaf, parentFolder);
+    } else {
+      items = this.getExplorerItems(leaf);
+    }
     items.forEach((item) => {
       if (this.explorerItemIsFolder(item) && item.collapsed !== collapsed) {
         item.setCollapsed(collapsed);
@@ -38,6 +71,20 @@ export class FileExplorerProvider extends ProviderBase {
    */
   private getExplorerItems(leaf: WorkspaceLeaf): FileExplorerItem[] {
     return Object.values((leaf.view as any).fileItems) as FileExplorerItem[];
+  }
+
+  /**
+   * Get all FileExplorerItems that are descendants of the current folder
+   */
+  private getCurrentLevelItems(
+    leaf: WorkspaceLeaf,
+    parentFolder: TFolder
+  ): FileExplorerItem[] {
+    const allItems = this.getExplorerItems(leaf);
+    // This is a very naiive but cheap way to do this.
+    return allItems.filter((item) =>
+      item.file.path.startsWith(`${parentFolder.path}/`)
+    );
   }
 
   /**
