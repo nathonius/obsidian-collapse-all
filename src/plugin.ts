@@ -1,4 +1,4 @@
-import { Plugin } from 'obsidian';
+import { Menu, MenuItem, Plugin, TAbstractFile, WorkspaceLeaf } from 'obsidian';
 import { DEFAULT_SETTINGS, ProviderType } from './constants';
 import { Settings } from './interfaces';
 import { FileExplorerProvider, TagPaneProvider } from './provider';
@@ -27,6 +27,17 @@ export class CollapseAllPlugin extends Plugin {
         provider.addButtons();
       });
     });
+
+    this.app.workspace.on(
+      'file-menu',
+      (menu: Menu, file: TAbstractFile, source: string) => {
+        (this.providers.FileExplorer as FileExplorerProvider).handleMenu(
+          menu,
+          file,
+          source
+        );
+      }
+    );
 
     // File explorers that get opened later on
     this.registerEvent(

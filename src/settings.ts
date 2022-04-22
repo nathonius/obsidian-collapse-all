@@ -28,6 +28,20 @@ export class CollapseAllPluginSettings extends PluginSettingTab {
             await this.plugin.saveSettings();
           });
       });
+    new Setting(this.containerEl)
+      .setName('Folder context menu')
+      .setDesc(
+        'If enabled, add commands to the folder right-click context menu to collapse and expand that folder and its children only.'
+      )
+      .addToggle((toggle) => {
+        toggle
+          .setTooltip('Folder context menu')
+          .setValue(this.plugin.settings.folderContextMenu)
+          .onChange(async (value) => {
+            this.plugin.settings.folderContextMenu = value;
+            await this.plugin.saveSettings();
+          });
+      });
 
     this.containerEl.createEl('h3', { text: 'Command settings' });
     this.containerEl.createEl('p', {

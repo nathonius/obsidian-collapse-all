@@ -12,6 +12,10 @@ To collapse all folders, either click the new button at the top of the file expl
 
 To expand all folders, either click the new button at the top of the file explorer pane or run the "Expand all open folders" command. When at least one folder or subfolder is open, the button becomes a collapse all button.
 
+### Collapse / Expand Selected Folder
+
+Right click on a folder in the file explorer and select "Collapse this level" or "Expand this level" to collapse or expand only that folder and its children.
+
 ![CollapseAll](docs/CollapseAll.gif)
 
 ## Changelog

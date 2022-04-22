@@ -86,7 +86,10 @@ export abstract class ProviderBase {
   /**
    * Collapse all open items in the given leaf or all leaves
    */
-  public collapseAll(updateIcon = true, singleLeaf?: WorkspaceLeaf): void {
+  public collapseAll(
+    updateIcon = true,
+    singleLeaf: WorkspaceLeaf | null = null
+  ): void {
     const leaves = singleLeaf ? [singleLeaf] : this.leaves;
     leaves.forEach((leaf) => {
       this.collapseOrExpandAll(leaf, true);
@@ -99,7 +102,10 @@ export abstract class ProviderBase {
   /**
    * Expand all collapsed items in the given leaf or all leaves
    */
-  public expandAll(updateIcon = true, singleLeaf?: WorkspaceLeaf): void {
+  public expandAll(
+    updateIcon = true,
+    singleLeaf: WorkspaceLeaf | null = null
+  ): void {
     const leaves = singleLeaf ? [singleLeaf] : this.leaves;
     leaves.forEach((leaf) => {
       this.collapseOrExpandAll(leaf, false);
