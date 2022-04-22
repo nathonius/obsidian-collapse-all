@@ -1,3 +1,9 @@
+# 1.5.1
+
+## Fixes
+
+- Include the selected folder when collapsing or expanding a specific folder
+
 # 1.5.0
 
 ## Features
