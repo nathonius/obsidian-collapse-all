@@ -97,8 +97,10 @@ export class FileExplorerProvider extends ProviderBase {
   ): FileExplorerItem[] {
     const allItems = this.getExplorerItems(leaf);
     // This is a very naiive but cheap way to do this.
-    return allItems.filter((item) =>
-      item.file.path.startsWith(`${parentFolder.path}/`)
+    return allItems.filter(
+      (item) =>
+        item.file.path.startsWith(`${parentFolder.path}/`) ||
+        item.file.path === parentFolder.path
     );
   }
 
