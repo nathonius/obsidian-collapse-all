@@ -1,3 +1,10 @@
+# 1.5.0
+
+## Features
+
+- Attachment folders are not expanded by default.
+- New commands are added to the file explorer right click menu to collapse or expand an individual folder and its children.
+
 # 1.4.0
 
 ## Features
