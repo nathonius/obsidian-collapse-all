@@ -1,8 +1,21 @@
-import { WorkspaceLeaf } from 'obsidian';
+import { View, WorkspaceLeaf } from 'obsidian';
 import { CollapseAllPlugin } from '../plugin';
 import { ProviderType } from '../constants';
 import { TagExplorerItem } from '../interfaces';
 import { ProviderBase } from './base';
+
+interface TagDom {
+  tag: string,
+  collapsed: boolean,
+  setCollapsed?: (state: boolean) => void,
+  vChildren: {
+    _children: TagDom[]
+  }
+}
+
+interface TagPaneView extends View {
+  tagDoms: TagDom[]
+}
 
 export class TagPaneProvider extends ProviderBase {
   providerType: ProviderType = ProviderType.TagPane;
@@ -37,7 +50,16 @@ export class TagPaneProvider extends ProviderBase {
    * Get the root tag pane items from the tag pane view. This property is not documented.
    */
   private getTagItems(tagPane: WorkspaceLeaf): TagExplorerItem[] {
-    return Object.values((tagPane.view as any).tagDoms) as TagExplorerItem[];
+    return Object.values((tagPane.view as TagPaneView).tagDoms).map((tagDom: TagDom) => this.convertDomToTagItem(tagDom));
+  }
+
+  private convertDomToTagItem(tagDom: TagDom): TagExplorerItem {
+    return {
+        tag: tagDom.tag,
+        collapsed: tagDom.collapsed,
+        setCollapsed: tagDom.setCollapsed.bind(tagDom),
+        children: tagDom.vChildren._children.map((child: TagDom) => this.convertDomToTagItem(child))
+      } as TagExplorerItem;
   }
 
   /**
