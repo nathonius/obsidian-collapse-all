@@ -1,4 +1,4 @@
-import { TFile, TFolder } from 'obsidian';
+import { TFile, TFolder, View } from 'obsidian';
 import { ProviderType } from './constants';
 
 export interface Settings {
@@ -16,7 +16,14 @@ export interface FileExplorerItem {
 
 export interface TagExplorerItem {
   tag: string;
-  children: TagExplorerItem[];
+  children?: TagExplorerItem[];
   collapsed?: boolean;
   setCollapsed?: (state: boolean) => void;
+  vChildren?: {
+    children: TagExplorerItem[]
+  };
+}
+
+export interface TagPaneView extends View {
+  tagDoms: TagExplorerItem[]
 }
