@@ -4,10 +4,6 @@ import { ProviderType } from '../constants';
 import { TagExplorerItem, TagExplorerItemImpl, TagPaneView } from '../interfaces';
 import { ProviderBase } from './base';
 
-
-
-
-
 export class TagPaneProvider extends ProviderBase {
   providerType: ProviderType = ProviderType.TagPane;
   displayName = 'Tag Pane';
