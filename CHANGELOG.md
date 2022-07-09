@@ -1,3 +1,9 @@
+# 1.5.2
+
+## Fixes
+
+- Tag pane provider fixed for v0.15.0+
+
 # 1.5.1
 
 ## Fixes
