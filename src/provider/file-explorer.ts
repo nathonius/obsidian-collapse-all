@@ -7,7 +7,7 @@ import { ProviderBase } from './base';
 export class FileExplorerProvider extends ProviderBase {
   providerType: ProviderType = ProviderType.FileExplorer;
   displayName = 'File Explorer';
-  protected collapseButtonClass = 'nav-action-button';
+  protected collapseButtonClass = 'clickable-icon nav-action-button';
   protected collapseClickTarget = '.nav-folder-title';
   protected leafType = 'file-explorer';
   protected collapseCommandName = 'Collapse open folders in all file explorers';
