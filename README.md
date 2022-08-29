@@ -1,3 +1,7 @@
+# NOTE: THIS PLUGIN IS NO LONGER NEEDED
+
+Obsidian supports a collapse all button natively for the file explorer and tag pane as of v0.16.0.
+
 ## Collapse All Obsidian Plugin
 
 When your Obsidian file explorer is overloaded with open folders, close them all with a single click or command. Or, if you want to explore your folder tree, expand all folders.
