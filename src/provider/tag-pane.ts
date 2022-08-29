@@ -7,7 +7,7 @@ import { ProviderBase } from './base';
 export class TagPaneProvider extends ProviderBase {
   providerType: ProviderType = ProviderType.TagPane;
   displayName = 'Tag Pane';
-  protected collapseButtonClass = 'nav-action-button';
+  protected collapseButtonClass = 'clickable-icon nav-action-button';
   protected collapseClickTarget = '.tag-container .tree-item';
   protected leafType = 'tag';
   protected collapseCommandName = 'Collapse open tags in all tag explorers';
@@ -23,7 +23,10 @@ export class TagPaneProvider extends ProviderBase {
 
     // Collapse / expand
     items.forEach((item) => {
-      if (this.getChildrenSafe(item).length > 0 && item.collapsed !== collapsed) {
+      if (
+        this.getChildrenSafe(item).length > 0 &&
+        item.collapsed !== collapsed
+      ) {
         item.setCollapsed(collapsed);
       }
     });
@@ -44,7 +47,9 @@ export class TagPaneProvider extends ProviderBase {
    * Given the root tags, checks all children to confirm they are closed. Note that this is recursive.
    */
   private tagsAreCollapsed(items: TagExplorerItem[]): boolean {
-    return items.every((i) => this.getChildrenSafe(i).length === 0 || i.collapsed === true);
+    return items.every(
+      (i) => this.getChildrenSafe(i).length === 0 || i.collapsed === true
+    );
   }
 
   private getChildrenSafe(item: TagExplorerItem): TagExplorerItem[] {
