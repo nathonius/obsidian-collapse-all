@@ -1,3 +1,9 @@
+# 1.5.3
+
+## Fixes
+
+- Collapse button alignment corrected for v0.16.0+
+
 # 1.5.2
 
 ## Fixes
