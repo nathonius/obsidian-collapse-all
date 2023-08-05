@@ -10,6 +10,7 @@
 
 - Each set of commands now includes a "toggle" command as well as the collapse and expand commands.
 - Support for search view
+- Support for bookmarks view
 
 ## Fixes
 

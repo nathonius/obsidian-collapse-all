@@ -6,5 +6,6 @@ declare module 'obsidian' {
     toggleCollapseAll: () => void;
     setCollapseAll: (collapse: boolean) => void;
     isAllCollapsed: boolean;
+    collapseOrExpandAllEl: HTMLDivElement;
   }
 }
