@@ -1,4 +1,3 @@
-import { CollapseAllPlugin } from '../plugin';
 import { ProviderType } from '../constants';
 import { ProviderBase } from './base';
 
@@ -11,8 +10,4 @@ export class TagPaneProvider extends ProviderBase {
   protected readonly expandCommandName =
     'Expand closed tags in all tag explorers';
   protected readonly toggleCommandName = 'Toggle collapse in all tag explorers';
-
-  constructor(plugin: CollapseAllPlugin) {
-    super(plugin);
-  }
 }
