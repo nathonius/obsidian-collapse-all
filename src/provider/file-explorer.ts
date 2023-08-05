@@ -1,4 +1,3 @@
-import { CollapseAllPlugin } from '../plugin';
 import { ProviderType } from '../constants';
 import { ProviderBase } from './base';
 
@@ -12,8 +11,4 @@ export class FileExplorerProvider extends ProviderBase {
     'Expand closed folders in all file explorers';
   protected readonly toggleCommandName =
     'Toggle collapse in all file explorers';
-
-  constructor(plugin: CollapseAllPlugin) {
-    super(plugin);
-  }
 }
