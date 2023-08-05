@@ -4,6 +4,7 @@ import { Settings } from './interfaces';
 import {
   FileExplorerProvider,
   GlobalProvider,
+  SearchProvider,
   TagPaneProvider
 } from './provider';
 import { ProviderBase } from './provider/base';
@@ -15,7 +16,8 @@ export class CollapseAllPlugin extends Plugin {
   providers: Record<ProviderType, ProviderBase> = {
     [ProviderType.Global]: new GlobalProvider(this),
     [ProviderType.FileExplorer]: new FileExplorerProvider(this),
-    [ProviderType.TagPane]: new TagPaneProvider(this)
+    [ProviderType.TagPane]: new TagPaneProvider(this),
+    [ProviderType.Search]: new SearchProvider(this)
   };
 
   get allProviders(): ProviderBase[] {

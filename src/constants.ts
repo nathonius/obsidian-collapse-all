@@ -4,12 +4,14 @@ export const DEFAULT_SETTINGS: Settings = {
   commands: {
     Global: false,
     FileExplorer: true,
-    TagPane: true
+    TagPane: true,
+    Search: false
   }
 };
 
 export enum ProviderType {
   FileExplorer = 'FileExplorer',
   TagPane = 'TagPane',
-  Global = 'Global'
+  Global = 'Global',
+  Search = 'Search'
 }
