@@ -3,7 +3,7 @@
   "name": "Collapse All",
   "version": "2.0.0",
   "minAppVersion": "1.0.0",
-  "description": "This plugin adds a button to collapse or expand all folders in the file explorer.",
+  "description": "Extends collapse/expand all with commands that can be bound to hotkeys.",
   "author": "OfficerHalf",
   "authorUrl": "https://nathan-smith.org/",
   "isDesktopOnly": false
