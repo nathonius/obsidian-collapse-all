@@ -2,6 +2,7 @@ import { Plugin } from 'obsidian';
 import { DEFAULT_SETTINGS, ProviderType } from './constants';
 import { Settings } from './interfaces';
 import {
+  BookmarksProvider,
   FileExplorerProvider,
   GlobalProvider,
   SearchProvider,
@@ -17,7 +18,8 @@ export class CollapseAllPlugin extends Plugin {
     [ProviderType.Global]: new GlobalProvider(this),
     [ProviderType.FileExplorer]: new FileExplorerProvider(this),
     [ProviderType.TagPane]: new TagPaneProvider(this),
-    [ProviderType.Search]: new SearchProvider(this)
+    [ProviderType.Search]: new SearchProvider(this),
+    [ProviderType.Bookmarks]: new BookmarksProvider(this)
   };
 
   get allProviders(): ProviderBase[] {

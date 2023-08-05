@@ -12,6 +12,8 @@ Commands can be toggled on or off in settings. Each set of commands has a collap
 - Tag Pane
 - Search
   - Does not support collapse toggle, only expand and collapse
+- Bookmarks
+  - Only supports toggle, may be a bit finnicky
 - Global (all supported views)
 
 ## Changelog

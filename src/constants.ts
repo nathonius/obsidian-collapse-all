@@ -5,7 +5,8 @@ export const DEFAULT_SETTINGS: Settings = {
     Global: false,
     FileExplorer: true,
     TagPane: true,
-    Search: false
+    Search: false,
+    Bookmarks: false
   }
 };
 
@@ -13,5 +14,6 @@ export enum ProviderType {
   FileExplorer = 'FileExplorer',
   TagPane = 'TagPane',
   Global = 'Global',
-  Search = 'Search'
+  Search = 'Search',
+  Bookmarks = 'Bookmarks'
 }
