@@ -103,13 +103,15 @@ export abstract class ProviderBase {
   ): void {
     if (collapsed === undefined) {
       if (!leaf.view.toggleCollapseAll) {
-        console.error('No toggle collapse function found on view.');
+        console.error(
+          `No toggle collapse function found on ${this.leafType} view.`
+        );
         return;
       }
       leaf.view.toggleCollapseAll();
     } else {
       if (!leaf.view.setCollapseAll) {
-        console.error('No collapse function found on view.');
+        console.error(`No collapse function found on ${this.leafType} view.`);
         return;
       }
       leaf.view.setCollapseAll(collapsed);
@@ -161,7 +163,7 @@ export abstract class ProviderBase {
   /**
    * Returns all loaded leaves of the class leafType
    */
-  private get leaves(): WorkspaceLeaf[] {
+  protected get leaves(): WorkspaceLeaf[] {
     return this.plugin.app.workspace.getLeavesOfType(this.leafType);
   }
 }

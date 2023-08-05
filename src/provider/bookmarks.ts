@@ -14,6 +14,18 @@ export class BookmarksProvider extends ProviderBase {
     return [this.toggleCommand];
   }
 
+  public override allCollapsed(_?: WorkspaceLeaf): boolean {
+    return false;
+  }
+
+  public override collapseAll(): void {
+    // Not available
+  }
+
+  public override expandAll(): void {
+    // Not available
+  }
+
   protected override collapseOrExpandAll(leaf: WorkspaceLeaf): void {
     leaf.view.collapseOrExpandAllEl?.click();
   }

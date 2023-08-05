@@ -1,4 +1,4 @@
-import { Command } from 'obsidian';
+import { Command, WorkspaceLeaf } from 'obsidian';
 import { ProviderType } from '../constants';
 import { ProviderBase } from './base';
 
@@ -12,5 +12,9 @@ export class SearchProvider extends ProviderBase {
 
   protected override get commands(): Command[] {
     return [this.collapseCommand, this.expandCommand];
+  }
+
+  public override toggleCollapse(): void {
+    // Not available
   }
 }
