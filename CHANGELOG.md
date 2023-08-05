@@ -1,3 +1,19 @@
+# 2.0.0
+
+## Breaking Changes
+
+- The plugin has been largely re-written. It now uses Obsidian's internal collapse / expand logic.
+- Collapse / expand via file explorer context menu is removed.
+- Settings and hotkeys will likely need to be reset.
+
+## Features
+
+- Each set of commands now includes a "toggle" command as well as the collapse and expand commands.
+
+## Fixes
+
+- Commands will be added immediately when toggled on in settings.
+
 # 1.5.3
 
 ## Fixes
