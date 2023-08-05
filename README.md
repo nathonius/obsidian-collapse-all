@@ -10,6 +10,8 @@ Commands can be toggled on or off in settings. Each set of commands has a collap
 
 - File Explorer
 - Tag Pane
+- Search
+  - Does not support collapse toggle, only expand and collapse
 - Global (all supported views)
 
 ## Changelog
