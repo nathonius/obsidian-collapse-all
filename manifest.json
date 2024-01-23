@@ -4,7 +4,7 @@
   "version": "2.0.0",
   "minAppVersion": "1.0.0",
   "description": "Extends collapse/expand all with commands that can be bound to hotkeys.",
-  "author": "OfficerHalf",
+  "author": "Nathonius",
   "authorUrl": "https://nathan-smith.org/",
   "isDesktopOnly": false
 }
