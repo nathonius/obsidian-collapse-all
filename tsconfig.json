@@ -5,18 +5,12 @@
     "inlineSources": true,
     "module": "ESNext",
     "target": "es6",
-    "allowJs": true,
+    "allowJs": false,
     "noImplicitAny": true,
+    "strict": true,
     "moduleResolution": "node",
     "importHelpers": true,
-    "lib": [
-      "dom",
-      "es5",
-      "scripthost",
-      "es2015"
-    ]
+    "lib": ["dom", "es5", "scripthost", "es2015"]
   },
-  "include": [
-    "**/*.ts"
-  ]
+  "include": ["**/*.ts"]
 }

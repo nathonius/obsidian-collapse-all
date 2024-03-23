@@ -102,19 +102,19 @@ export abstract class ProviderBase {
     collapsed?: boolean
   ): void {
     if (collapsed === undefined) {
-      if (!leaf.view.toggleCollapseAll) {
+      if (!leaf.view.tree?.toggleCollapseAll) {
         console.error(
           `No toggle collapse function found on ${this.leafType} view.`
         );
         return;
       }
-      leaf.view.toggleCollapseAll();
+      leaf.view.tree?.toggleCollapseAll();
     } else {
-      if (!leaf.view.setCollapseAll) {
+      if (!leaf.view.tree?.setCollapseAll) {
         console.error(`No collapse function found on ${this.leafType} view.`);
         return;
       }
-      leaf.view.setCollapseAll(collapsed);
+      leaf.view.tree.setCollapseAll(collapsed);
     }
   }
 
@@ -125,7 +125,7 @@ export abstract class ProviderBase {
     const leaves = singleLeaf ? [singleLeaf] : this.leaves;
     let collapsed = true;
     for (const leaf of leaves) {
-      if (!leaf.view.isAllCollapsed) {
+      if (leaf.view.tree?.isAllCollapsed === undefined) {
         console.error('No collapsed state found on view.');
         collapsed = false;
       }
