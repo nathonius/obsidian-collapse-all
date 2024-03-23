@@ -1,3 +1,15 @@
+# 2.1.0
+
+## Features
+
+- Bookmarks view supports all three command options
+
+## Fixes
+
+- Restored functionality of all providers
+- Tag pane no longer supports collapse and expand commands, only toggle
+  - This was a bug previously, the collapse and expand commands were not reliable.
+
 # 2.0.0
 
 ## Breaking Changes
