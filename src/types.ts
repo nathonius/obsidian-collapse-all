@@ -1,11 +1,15 @@
-// eslint-disable-next-line - Need at least one import so this compiles.
-import { View } from 'obsidian';
-
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import type { View } from 'obsidian';
 declare module 'obsidian' {
   interface View {
-    toggleCollapseAll: () => void;
-    setCollapseAll: (collapse: boolean) => void;
-    isAllCollapsed: boolean;
-    collapseOrExpandAllEl: HTMLDivElement;
+    tree?: {
+      toggleCollapseAll?: () => void;
+      setCollapseAll?: (collapse: boolean) => void;
+      isAllCollapsed?: boolean;
+    };
+    toggleCollapseAll?: () => void;
+    setCollapseAll?: (collapse: boolean) => void;
+    isAllCollapsed?: boolean;
+    collapseOrExpandAllEl?: HTMLDivElement;
   }
 }

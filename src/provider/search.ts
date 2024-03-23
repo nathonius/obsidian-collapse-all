@@ -17,4 +17,23 @@ export class SearchProvider extends ProviderBase {
   public override toggleCollapse(): void {
     // Not available
   }
+
+  /**
+   * Collapse or expand all items for the given leaf
+   * @argument collapsed if not provided, will toggle the state
+   */
+  protected collapseOrExpandAll(
+    leaf: WorkspaceLeaf,
+    collapsed?: boolean
+  ): void {
+    if (collapsed === undefined) {
+      // Not availabble
+    } else {
+      if (!leaf.view.setCollapseAll) {
+        console.error(`No collapse function found on ${this.leafType} view.`);
+        return;
+      }
+      leaf.view.setCollapseAll(collapsed);
+    }
+  }
 }
