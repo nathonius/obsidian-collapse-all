@@ -1,8 +1,8 @@
 {
   "id": "obsidian-collapse-all-plugin",
   "name": "Collapse All",
-  "version": "2.0.0",
-  "minAppVersion": "1.0.0",
+  "version": "2.1.0",
+  "minAppVersion": "1.5.11",
   "description": "Extends collapse/expand all with commands that can be bound to hotkeys.",
   "author": "Nathonius",
   "authorUrl": "https://nathan-smith.org/",
